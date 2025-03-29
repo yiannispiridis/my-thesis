@@ -1,0 +1,13 @@
+# IntelliJ IDEA specific files
+*.iml
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# JetBrains workspace and VCS files
+workspace.xml
+vcs.xml
+profiles_settings.xml
+modules.xml
+Project_Default.xml
