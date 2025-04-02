@@ -1,31 +1,22 @@
 import asyncpg
-from datetime import datetime
+import logging
+from config import DB_CONFIG
 
-DB_CONFIG = {
-    "host": "localhost",
-    "port": 5432,
-    "user": "postgres",
-    "password": "yourpassword",
-    "database": "stocks"
-}
+class Database:
+    def __init__(self, db_config):
+        self.db_config = db_config
+        self.pool = None
 
-async def save_to_db(symbol, data):
-    """Save stock data to TimescaleDB asynchronously."""
-    timestamp_str = data[0]
-    timestamp = datetime.strptime(timestamp_str, '%Y%m%d %H:%M:%S')
+    async def init_pool(self):
+        """Initialize the database connection pool."""
+        self.pool = await asyncpg.create_pool(**self.db_config)
+        logging.info("Database pool initialized.")
 
-    async with asyncpg.create_pool(**DB_CONFIG) as pool:
-        async with pool.acquire() as conn:
-            await conn.execute("""
-                INSERT INTO stock_prices (symbol, timestamp, open, high, low, close, volume)
-                VALUES ($1, $2, $3, $4, $5, $6, $7);
-            """, symbol, timestamp, data[1], data[2], data[3], data[4], data[5])
+    async def close_pool(self):
+        """Close the database connection pool."""
+        if self.pool:
+            await self.pool.close()
+            self.pool = None
+            logging.info("Database pool closed.")
 
-async def get_latest_timestamp(symbol):
-    """Get the latest timestamp for the given symbol from the database."""
-    async with asyncpg.create_pool(**DB_CONFIG) as pool:
-        async with pool.acquire() as conn:
-            result = await conn.fetch("""
-                SELECT MAX(timestamp) FROM stock_prices WHERE symbol = $1;
-            """, symbol)
-            return result[0]['max'] if result else None
+db = Database(DB_CONFIG)
