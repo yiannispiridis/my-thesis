@@ -2,7 +2,8 @@ import asyncio
 import logging
 from datetime import datetime
 
-from data_processor import on_historical_data
+from config import YEARS_OF_DATA
+from ibkr.data_processor import create_on_historical_data_callback
 from utils import get_end_date_time
 from ibapi.contract import Contract
 
@@ -15,15 +16,15 @@ def create_contract(symbol):
     contract.currency = "USD"
     return contract
 
-async def fetch_historical_data(app,contract):
+async def fetch_historical_data(app,contract, pool):
     """Fetch historical data for a stock symbol from IBKR API."""
-    years_to_fetch = 30
     current_year = datetime.now().year
 
-    for year in range(current_year, current_year - years_to_fetch, -1):
+    for year in range(current_year, current_year - YEARS_OF_DATA, -1):
         end_date = get_end_date_time(year)
         reqId = app.create_symbol_reqId_mapping(contract.symbol)
-        app.add_callback(reqId, on_historical_data)
+        a_callback = create_on_historical_data_callback(pool)
+        app.add_callback(reqId, a_callback)
         try:
             app.reqHistoricalData(
                 reqId=reqId,
