@@ -33,3 +33,9 @@ def normalize_date(end):
     if isinstance(end, int):  # e.g. 2020
         return date(end, 12, 31)
     raise TypeError(f"Unsupported date format: {end} ({type(end)})")
+
+def parse_date(ts):
+    try:
+        return datetime.strptime(ts, '%Y%m%d %H:%M:%S')
+    except ValueError:
+        return datetime.strptime(ts, '%Y%m%d')

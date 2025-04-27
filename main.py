@@ -15,9 +15,8 @@ async def main():
 
     await asyncio.gather(
         ibkr_data_manager(tickers, db.pool),
-        sec_edgar_data_manager(tickers_with_cik, fundamental_concepts, YEARS_OF_DATA, db.pool)
+        #sec_edgar_data_manager(tickers_with_cik, fundamental_concepts, YEARS_OF_DATA, db.pool)
     )
-    await asyncio.sleep(100)
     await db.close_pool()
 
 

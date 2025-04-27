@@ -1,14 +1,12 @@
 import logging
-from datetime import datetime
-
-from utils import normalize_date
+from utils import normalize_date, parse_date
 
 
 async def save_batch_to_db(pool, symbol, data_batch):
     """Save stock data into the database."""
     async with pool.acquire() as conn:
         async with conn.transaction():
-            values = [(symbol, datetime.strptime(data[0], '%Y%m%d %H:%M:%S'), *data[1:]) for data in data_batch]
+            values = [(symbol, parse_date(data[0]), *data[1:]) for data in data_batch]
             await conn.executemany("""
                 INSERT INTO stock_prices (symbol, timestamp, open, high, low, close, volume)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -41,3 +39,58 @@ async def save_financial_metrics_to_db(pool, symbol, data_batch):
             """, values)
 
     logging.info(f"Saved {len(data_batch)} financial metric records for {symbol}.")
+
+async def fetch_combined_stock_data(pool):
+    """Fetch all data from combined_stock_data."""
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT 
+                symbol, timestamp, open, high, low, close, volume,
+                revenue, gross_profit, assets, commercial_paper,
+                shares_outstanding, long_term_debt_current,
+                r_and_d_expense, dividends_paid, stockholders_equity,
+                net_income_loss
+            FROM combined_stock_data
+            ORDER BY symbol, timestamp ASC;
+        """)
+    return rows
+
+
+async def save_normalized_to_db(pool, data_batch):
+    """Save normalized stock data into the normalized_stock_data table."""
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            values = [
+                (
+                    data['symbol'],
+                    data['timestamp'],
+                    data['open'],
+                    data['high'],
+                    data['low'],
+                    data['close'],
+                    data['volume'],
+                    data['revenue'],
+                    data['gross_profit'],
+                    data['assets'],
+                    data['commercial_paper'],
+                    data['shares_outstanding'],
+                    data['long_term_debt_current'],
+                    data['r_and_d_expense'],
+                    data['dividends_paid'],
+                    data['stockholders_equity'],
+                    data['net_income_loss']
+                ) for data in data_batch
+            ]
+            await conn.executemany("""
+                INSERT INTO normalized_stock_data (
+                    symbol, timestamp, open, high, low, close, volume,
+                    revenue, gross_profit, assets, commercial_paper,
+                    shares_outstanding, long_term_debt_current,
+                    r_and_d_expense, dividends_paid, stockholders_equity,
+                    net_income_loss
+                ) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+                ON CONFLICT (symbol, timestamp) DO NOTHING;
+            """, values)
+
+    logging.info(f"Saved {len(data_batch)} normalized records to normalized_stock_data.")

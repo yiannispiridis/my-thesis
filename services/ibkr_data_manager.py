@@ -24,6 +24,7 @@ async def ibkr_data_manager(tickers, pool):
 
     for symbol in batch_data:
         await save_batch(symbol, pool)
+    await asyncio.sleep(1000)
 
     logging.info("✅ Finished IBKR data orchestration")
 
