@@ -31,7 +31,7 @@ async def fetch_historical_data(app,contract, pool):
                 contract=contract,
                 endDateTime=end_date,
                 durationStr='1 Y',
-                barSizeSetting='1 hour',
+                barSizeSetting='1 week',
                 whatToShow='TRADES',
                 useRTH=1,
                 formatDate=1,
