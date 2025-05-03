@@ -1,10 +1,10 @@
 import asyncio
 import logging
 
-from config import tickers, tickers_with_cik, fundamental_concepts, YEARS_OF_DATA
-from database.connection import db
-from services.ibkr_data_manager import ibkr_data_manager
-from services.sec_edgar_data_manager import sec_edgar_data_manager
+from backend.config import tickers
+from backend.database.connection import db
+from backend.preprocessing.data_transformation import save_normalized_data
+from backend.services.ibkr_data_manager import ibkr_data_manager
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,8 +14,9 @@ async def main():
     await asyncio.sleep(5)
 
     await asyncio.gather(
-        ibkr_data_manager(tickers, db.pool),
+        #ibkr_data_manager(tickers, db.pool),
         #sec_edgar_data_manager(tickers_with_cik, fundamental_concepts, YEARS_OF_DATA, db.pool)
+        save_normalized_data(db.pool)
     )
     await db.close_pool()
 

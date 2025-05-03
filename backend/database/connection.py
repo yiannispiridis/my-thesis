@@ -1,6 +1,6 @@
 import asyncpg
 import logging
-from config import DB_CONFIG
+from backend.config import DB_CONFIG
 
 class Database:
     def __init__(self, db_config):

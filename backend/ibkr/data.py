@@ -2,9 +2,9 @@ import asyncio
 import logging
 from datetime import datetime
 
-from config import YEARS_OF_DATA
-from ibkr.data_processor import create_on_historical_data_callback
-from utils import get_end_date_time
+from backend.config import YEARS_OF_DATA
+from backend.ibkr.data_processor import create_on_historical_data_callback
+from backend.utils import get_end_date_time
 from ibapi.contract import Contract
 
 def create_contract(symbol):
