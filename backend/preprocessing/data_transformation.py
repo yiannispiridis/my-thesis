@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-from database.repository import fetch_combined_stock_data, save_normalized_to_db
+from backend.database.repository import fetch_combined_stock_data, save_normalized_to_db
 
 
 async def normalize_combined_stock_data(pool):
@@ -23,6 +23,7 @@ async def normalize_combined_stock_data(pool):
     scaler = StandardScaler()
 
     df[columns_to_normalize] = scaler.fit_transform(df[columns_to_normalize])
+    df[columns_to_normalize] = df[columns_to_normalize].round(3)
 
     return df
 

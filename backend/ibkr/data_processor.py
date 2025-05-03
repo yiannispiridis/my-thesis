@@ -1,11 +1,11 @@
 import logging
 import threading
 
-from config import BATCH_SIZE, RETRY_LIMIT
+from backend.config import BATCH_SIZE, RETRY_LIMIT
 import asyncio
 from asyncpg.exceptions import TooManyConnectionsError
 
-from database.repository import save_batch_to_db
+from backend.database.repository import save_batch_to_db
 
 batch_data = {}
 lock = threading.Lock()

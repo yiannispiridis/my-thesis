@@ -1,10 +1,10 @@
 import asyncio
 import logging
 
-from ibkr.data import create_contract, fetch_historical_data
-from ibkr.data_processor import batch_data, save_batch
-from ibkr.thread import start_api_thread
-from ibkr.wrapper import IBApi
+from backend.ibkr.data import create_contract, fetch_historical_data
+from backend.ibkr.data_processor import batch_data, save_batch
+from backend.ibkr.thread import start_api_thread
+from backend.ibkr.wrapper import IBApi
 
 
 async def ibkr_data_manager(tickers, pool):

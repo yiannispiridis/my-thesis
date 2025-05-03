@@ -1,7 +1,7 @@
 import logging
-from database.repository import save_financial_metrics_to_db
-from sec_edgar.client import fetch_sec_data
-from sec_edgar.transformer import extract_concept_data
+from backend.database.repository import save_financial_metrics_to_db
+from backend.sec_edgar.client import fetch_sec_data
+from backend.sec_edgar.transformer import extract_concept_data
 
 logging.basicConfig(
     level=logging.INFO,

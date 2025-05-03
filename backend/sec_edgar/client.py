@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from datetime import datetime
-from config import SEC_EDGAR_API_URL, USER_AGENT, SEC_DATA_DIR
+from backend.config import SEC_EDGAR_API_URL, USER_AGENT, SEC_DATA_DIR
 
 def fetch_sec_data(cik):
     headers = {'User-Agent': USER_AGENT}

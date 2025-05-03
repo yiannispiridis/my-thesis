@@ -1,5 +1,8 @@
 import logging
-from utils import normalize_date, parse_date
+
+import pandas as pd
+
+from backend.utils import normalize_date, parse_date
 
 
 async def save_batch_to_db(pool, symbol, data_batch):
@@ -55,6 +58,22 @@ async def fetch_combined_stock_data(pool):
         """)
     return rows
 
+async def fetch_normalized_stock_data(pool):
+    """Fetch all data from normalized_stock_data."""
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT 
+                symbol, timestamp, open, high, low, close, volume,
+                revenue, gross_profit, assets, commercial_paper,
+                shares_outstanding, long_term_debt_current,
+                r_and_d_expense, dividends_paid, stockholders_equity,
+                net_income_loss
+            FROM normalized_stock_data
+            ORDER BY symbol, timestamp ASC;
+        """)
+    return rows
+
+
 
 async def save_normalized_to_db(pool, data_batch):
     """Save normalized stock data into the normalized_stock_data table."""
@@ -62,24 +81,24 @@ async def save_normalized_to_db(pool, data_batch):
         async with conn.transaction():
             values = [
                 (
-                    data['symbol'],
-                    data['timestamp'],
-                    data['open'],
-                    data['high'],
-                    data['low'],
-                    data['close'],
-                    data['volume'],
-                    data['revenue'],
-                    data['gross_profit'],
-                    data['assets'],
-                    data['commercial_paper'],
-                    data['shares_outstanding'],
-                    data['long_term_debt_current'],
-                    data['r_and_d_expense'],
-                    data['dividends_paid'],
-                    data['stockholders_equity'],
-                    data['net_income_loss']
-                ) for data in data_batch
+                    row['symbol'],
+                    row['timestamp'],
+                    row['open'],
+                    row['high'],
+                    row['low'],
+                    row['close'],
+                    row['volume'],
+                    row['revenue'],
+                    row['gross_profit'],
+                    row['assets'],
+                    row['commercial_paper'],
+                    row['shares_outstanding'],
+                    row['long_term_debt_current'],
+                    row['r_and_d_expense'],
+                    row['dividends_paid'],
+                    row['stockholders_equity'],
+                    row['net_income_loss']
+                ) for _, row in data_batch.iterrows()
             ]
             await conn.executemany("""
                 INSERT INTO normalized_stock_data (
@@ -94,3 +113,14 @@ async def save_normalized_to_db(pool, data_batch):
             """, values)
 
     logging.info(f"Saved {len(data_batch)} normalized records to normalized_stock_data.")
+
+
+async def get_stock_data_df(pool):
+    rows = await fetch_combined_stock_data(pool)
+    data = [dict(row) for row in rows]
+    return pd.DataFrame(data)
+
+async def get_normalized_data_df(pool):
+    rows = await fetch_normalized_stock_data(pool)
+    data = [dict(row) for row in rows]
+    return pd.DataFrame(data)
